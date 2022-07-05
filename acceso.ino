@@ -97,6 +97,8 @@ void loop() {
     if (! mfrc522.PICC_IsNewCardPresent()) { // si no hay una tarjeta persente
         lcd.noBacklight();
         lcd.clear();
+       
+        digitalWrite(LED_pass, HIGH);
         return;                             // vuelve a ejecutar el loop en esperea de una tarjeta
     }
 
