@@ -18,14 +18,10 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN); // crea objeto MFRC522 a través de pines de slave select y reset.
 
 // UID con permisos 
-byte LecturaUID[4];         // crea array para almacenar el UID leído
+byte LecturaUID[7];         // crea array para almacenar el UID leído con un máximo de 7 bits
 byte llavero[4] = {0x4C, 0x64, 0xF1, 0x37} ;    // LLAVERO  -> 4C 64 F1 37
 byte card[4] = {0x83, 0xF0, 0xCE, 0xA9} ;    // TARJETA -> 83 F0 CE A9
-byte Manolo_phone[1] = {0x08} ; // MANOLO'S PHONE -> 08
-byte Manolo_watch[1] = {0x08} ; // MANOLO'S WATCH -> 08
-byte Horacio_phone[4] = {0x08} ; // HORACIO'S PHONE -> 08
-byte Marina_phone[4] = {0x08} ; // MARINA'S PHONE -> 08
-byte Marina_watch[4] = {0x08} ; // MARINA'S WATCH -> 08
+byte Tag[7] = {0x04, 0x35, 0x7C, 0xF2, 0x13, 0x6F, 0x81} ; // TAG -> 04 35 7C F2 13 6F 81
 
 // LCD Screen
 #include <LiquidCrystal_I2C.h>
@@ -97,7 +93,7 @@ void loop() {
     if (! mfrc522.PICC_IsNewCardPresent()) { // si no hay una tarjeta persente
         lcd.noBacklight();
         lcd.clear();
-       
+
         digitalWrite(LED_pass, HIGH);
         return;                             // vuelve a ejecutar el loop en esperea de una tarjeta
     }
@@ -152,7 +148,25 @@ void loop() {
         lcd.setCursor(0,0);
         lcd.print("Bienvenido Card!");
         delay(4000);
+
+        return;
     }
+
+      // TAG
+      if (comparaUID(LecturaUID, Tag)) {
+
+        digitalWrite(LED_pass, LOW);    // enciende el LED verde
+
+        digitalWrite(cerradura, HIGH);  // desbloquea la cerradura
+
+        lcd.clear();
+        lcd.backlight();
+        lcd.setCursor(0,0);
+        lcd.print("Bienvenido Tag!");
+        delay(4000);
+
+        return;
+      }
     
     // WITHOUT ACCESS
     else {
@@ -162,7 +176,7 @@ void loop() {
         lcd.clear();
         lcd.backlight();
         lcd.setCursor(0,0);
-        lcd.print("YOU MUST BE ROOT!");
+        lcd.print("YOU MUST BE ROOT");
         delay(3000);
 
         lcd.clear();
@@ -171,6 +185,8 @@ void loop() {
         digitalWrite(LED_close, HIGH);
 
         mfrc522.PICC_HaltA();   // detener comunicación con la tarjeta
+
+        return;
     }
 }
 
